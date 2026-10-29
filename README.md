@@ -17,3 +17,8 @@ https://raw.githubusercontent.com/Wiojelt/Nuvio-Addons/main/wiocinema/manifest.j
 ```text
 https://raw.githubusercontent.com/Wiojelt/Nuvio-Addons/live/wiospor/manifest.json
 ```
+
+## Webos
+```text
+https://raw.githubusercontent.com/safaokten-cpu/Nuvio-Addons/refs/heads/main/manifest.json
+```
