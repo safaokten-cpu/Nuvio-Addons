@@ -85,12 +85,13 @@ export function toStbStreams(channel) {
     const macMatch = url.match(/mac=([0-9A-Fa-f:]+)/);
     const mac = macMatch ? macMatch[1] : '00:1A:79:36:DE:2B';
 
+    // webOS uyumluluğu için notWebReady false yapıldı ve MAG/Stb header'ları korundu
     out.push({
       name: `WioSpor • StbTV`,
       title: `${label} • ${panel} [${quality}]`,
       url,
       behaviorHints: {
-        notWebReady: true,
+        notWebReady: false,
         proxyHeaders: {
           request: {
             'User-Agent': 'Mozilla/5.0 (QtEmbedded; U; Linux; C)',
