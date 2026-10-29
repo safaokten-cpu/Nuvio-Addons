@@ -253,6 +253,7 @@ function qualityHint(label) {
   if (/360/.test(value)) return 360;
   return 0;
 }
+
 function streamItem(source, row, player) {
   const request = { 'User-Agent': player.headers?.['User-Agent'] || UA };
   for (const key of ['Referer','Origin','Cookie']) if (player.headers?.[key]) request[key] = player.headers[key];
@@ -261,7 +262,10 @@ function streamItem(source, row, player) {
     name: `WioSpor • Aslan • ${source.title}`,
     title: `${row.title}${quality ? ` • ${quality}p` : ' • Auto'}`,
     url: player.url,
-    behaviorHints: { notWebReady: true, proxyHeaders: { request } }
+    behaviorHints: { 
+      notWebReady: false, // webOS format hatasını tetikleyen kilit bayrak kapatıldı
+      proxyHeaders: { request } 
+    }
   };
 }
 
