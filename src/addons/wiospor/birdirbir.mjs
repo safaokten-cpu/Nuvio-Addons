@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: GPL-3.0-only
+* restored by @safaokteb
+*/
 import fs from 'node:fs/promises';
 
 const DB = new URL('../../../generated/birdirbir/channels.json', import.meta.url);
@@ -73,11 +76,21 @@ export function toBirdirbirStreams(channel) {
     const key = `${panel}\0${label}\0${url}`;
     if (seen.has(key)) continue;
     seen.add(key);
+    
+    // webOS ve tarayıcı tabanlı kısıtlamaları aşmak için optimize edildi
     out.push({
       name: `Birdirbir • ${panel}`,
       title: `${label}${quality ? ` • ${quality}` : ''}`,
       url,
-      behaviorHints: { notWebReady: true }
+      behaviorHints: { 
+        notWebReady: false, // webOS format hatasını tetikleyen bayrak kapatıldı
+        proxyHeaders: { 
+          request: { 
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36', 
+            'Referer': url 
+          } 
+        } 
+      }
     });
   }
   return out;
@@ -102,4 +115,4 @@ export function birdirbirPanelStats(channels) {
     counts[key] = (counts[key] || 0) + 1;
   }
   return counts;
-}
+          }
