@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only
  * Server-side WioSpor resolver port. No page JavaScript is evaluated.
+ * Restored by @safaokten
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -182,7 +183,6 @@ function matchesText(channel, rawCandidate) {
   const normTitle = compact(rawCandidate), normStd = compact(channel.standardTitle), cleaned = cleanCandidate(rawCandidate), normCleaned = compact(cleaned);
   const full = `${normTitle} ${normCleaned}`;
 
-  // 1. Strict Brand conflict guard must run first before ANY match
   const brands = [
     ['bein',['tivibu','tabii','tabi','exxen','ssport','s sport','smart','trt','aspor','htspor','euro','dazn','sky','tnt']],
     ['tabii',['tivibu','bein','exxen','ssport','s sport','smart','euro']],
@@ -195,7 +195,6 @@ function matchesText(channel, rawCandidate) {
     if (compact(channel.standardTitle).includes(brand) && conflicts.some(x => full.includes(x))) return false;
   }
 
-  // 2. Token guards
   const stdLower = normalizeText(channel.standardTitle), candLower = normalizeText(rawCandidate);
   for (const [token, stdHas, candHas] of [
     ['max', stdLower.includes('max'), candLower.includes('max')],
@@ -206,19 +205,16 @@ function matchesText(channel, rawCandidate) {
     if (stdHas !== candHas) return false;
   }
 
-  // 3. Number guards
   const stdNum = numbers(channel.standardTitle).at(-1), candNum = numbers(cleaned).at(-1);
   if (stdNum && candNum && stdNum !== candNum) return false;
   if (!stdNum && candNum && !['1','24','7'].includes(candNum)) return false;
 
-  // 4. Exact matches
   if (normTitle === normStd || normCleaned === normStd) return true;
   for (const alias of channel.aliases || []) {
     const a = compact(alias);
     if (normTitle === a || normCleaned === a) return true;
   }
 
-  // 5. Substring matches
   for (const alias of channel.aliases || []) {
     const a = compact(alias);
     if (a.length >= 4 && (normTitle.includes(a) || normCleaned.includes(a))) return true;
@@ -265,9 +261,25 @@ function hlsVariants(text, playlistUrl) {
   for (let i=0;i<lines.length;i++) if (lines[i].startsWith('#EXT-X-STREAM-INF:')) { let j=i+1; while (j<lines.length && (!lines[j] || lines[j].startsWith('#'))) j++; if (j<lines.length) out.push({ url: resolveUrl(lines[j].trim(), playlistUrl), quality: qualityFromLine(lines[i]) }); }
   return out;
 }
+
+// webOS ve tarayıcı tabanlı kısıtlamaları aşmak için optimize edilmiş streamObject
 function streamObject(spec, sourceChannel, playback, quality = 'Auto', url = playback.url) {
-  const reqHeaders = { 'User-Agent': UA, Referer: playback.referer, Origin: playback.referer.replace(/\/$/, '') };
-  return { name: `WioSpor • ${spec.name}`, title: `${sourceChannel.title} • ${quality}`, url, behaviorHints: { notWebReady: true, proxyHeaders: { request: reqHeaders } } };
+  const reqHeaders = { 
+    'User-Agent': UA, 
+    'Referer': playback.referer, 
+    'Origin': playback.referer ? playback.referer.replace(/\/$/, '') : '' 
+  };
+  return { 
+    name: `WioSpor • ${spec.name}`, 
+    title: `${sourceChannel.title} • ${quality}`, 
+    url, 
+    behaviorHints: { 
+      notWebReady: false, // webOS'in format hatasını tetikleyen kilit bayrak kaldırıldı/devre dışı bırakıldı
+      proxyHeaders: { 
+        request: reqHeaders 
+      } 
+    } 
+  };
 }
 
 export async function getStreamsForWioChannel(wioChannel) {
