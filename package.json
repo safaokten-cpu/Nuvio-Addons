@@ -10,7 +10,8 @@
     "build:live": "node scripts/build-wiospor-live.mjs",
     "validate": "node scripts/validate.mjs",
     "test": "npm run validate && node --test tests/*.test.mjs",
-    "wiospor:dev": "node src/addons/wiospor/server.mjs"
+    "wiospor:dev": "node src/addons/wiospor/server.mjs",
+    "start": "node src/addons/wiospor/server.mjs"
   },
   "engines": {
     "node": "24.x"
